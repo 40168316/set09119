@@ -2,6 +2,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <graphics_framework.h>
 #include <phys_utils.h>
+#include "main.h"
 
 using namespace std;
 using namespace graphics_framework;
@@ -13,27 +14,25 @@ bool load_content() {
 }
 
 bool update(float delta_time) {
-	static float rot = 0.0f;
-	rot += 0.2f * delta_time;
-	phys::SetCameraPos(rotate(vec3(15.0f, 12.0f, 15.0f), rot, vec3(0, 1.0f, 0)));
+	//static float rot = 0.0f;
+	//rot += 0.2f * delta_time;
+	//phys::SetCameraPos(rotate(vec3(15.0f, 12.0f, 15.0f), rot, vec3(0, 1.0f, 0)));
+	phys::SetCameraPos(vec3(30.0f, 10.0f, 30.0f));
 	phys::Update(delta_time);
+
 	return true;
 }
 
 bool render() {
-	phys::DrawSphere(glm::vec3(4.0f, 4.0f, 0), 1.0f, RED);
-	phys::DrawSphere(glm::vec3(-4.0f, 4.0f, 0), 1.0f, RED);
-	phys::DrawSphere(glm::vec3(0, 8.0f, 0), 0.2f, YELLOW);
-	phys::DrawSphere(glm::vec3(0), 1.0f, GREEN);
-	phys::DrawSphere(glm::vec3(0, 4.0f, 4.0f), 1.0f, BLUE);
-	phys::DrawSphere(glm::vec3(0, 4.0f, -4.0f), 1.0f, BLUE);
-	phys::DrawCube(glm::vec3(0, 4.0f, 0));
-	phys::DrawLine(glm::vec3(0, 4.0f, 4.0f), glm::vec3(0, 8.0f, 0));
-	phys::DrawLine(glm::vec3(0, 4.0f, -4.0f), glm::vec3(0, 8.0f, 0));
-	phys::DrawLine(glm::vec3(4.0f, 4.0f, 0), glm::vec3(0), true, ORANGE);
-	phys::DrawLine(glm::vec3(-4.0f, 4.0f, 0), glm::vec3(0), true, PINK);
-	phys::DrawLineCross(glm::vec3(0, 8.0f, 0), 1.0f, false);
-	phys::DrawArrow(glm::vec3(0, 4.0f, 0), glm::vec3(0, 8.0f, 0), 1.0f, GREY);
+	// Drawing a Sphere with X, Y, Z and Scale then Color
+	float stiffness = 1.0f;
+	for (float x = 0.0; x < 7; x++)
+	{
+		for (float z = 0.0; z < 7; z++)
+		{
+			phys::DrawSphere(glm::vec3(x * 3.0f, 4.0f, z * 3.0f), 0.2f, BLUE);
+		}
+	}
 	phys::DrawScene();
 	return true;
 }
