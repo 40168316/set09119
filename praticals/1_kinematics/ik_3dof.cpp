@@ -35,15 +35,16 @@ static void Reach(const size_t i, const dvec3 &target, std::vector<Link> &links)
   if (abs(cosAngle) < 1.0f) {
     // *********************************
     // Get the Axis perpendicular to the two vectors
-
+	  vec3 axis = normalize(cross(vLinkBaseToEndEffDirection, vLinkBaseToTargetDirection));
     // Get the Angle between the two vectors
-
+	  auto angle = glm::angle(vLinkBaseToEndEffDirection, vLinkBaseToTargetDirection);
     // Turn into a Quat
-
+	  dquat abba = glm::angleAxis(angle, axis);
     // Multply our current Quat with it
-
+	  dquat oasis = abba * qCur;
     // Pull out the angle and axis components, set the link params
-
+	  links[i].m_axis = glm::axis(oasis);
+	  links[i].m_angle = glm::angle(oasis);
 
     // *********************************
   }

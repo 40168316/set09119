@@ -21,23 +21,29 @@ bool IsColliding(const cSphereCollider &c1, const cSphereCollider &c2, dvec3 &po
 }
 
 bool IsColliding(const cSphereCollider &s, const cPlaneCollider &p, dvec3 &pos, dvec3 &norm, double &depth) {
-  const dvec3 sp = s.GetParent()->GetPosition();
-  const dvec3 pp = p.GetParent()->GetPosition();
+	const dvec3 sp = s.GetParent()->GetPosition();
+	const dvec3 pp = p.GetParent()->GetPosition();
+	// Calculate a vector from a point on the plane to the center of the sphere
+	const dvec3 vecTemp(sp - pp);
+	// Calculate the distance: dot product of the new vector with the plane's normal
+	double distance = dot(vecTemp, p.normal);
 
-  // Calculate a vector from a point on the plane to the center of the sphere
-  const dvec3 vecTemp(sp - pp);
+	if (distance <= s.radius) {
+		dvec3 vecTemp2 = (normalize(vecTemp));
 
-  // Calculate the distance: dot product of the new vector with the plane's normal
-  double distance = dot(vecTemp, p.normal);
-
-  if (distance <= s.radius) {
-    norm = p.normal;
-    pos = sp - norm * distance;
-    depth = s.radius - distance;
-    return true;
-  }
-
-  return false;
+		if (vecTemp2.x < 0 || vecTemp2.z < 0)
+		{
+			norm = dvec3(-vecTemp2.x, p.normal.y, vecTemp2.z); //p.normal;
+		}
+		else
+		{
+			norm = dvec3(vecTemp2.x, p.normal.y, vecTemp2.z);
+		}
+		pos = sp - norm * distance;
+		depth = s.radius - distance;
+		return true;
+	}
+	return false;
 }
 
 bool IsColliding(const cPlaneCollider &c1, const cPlaneCollider &c2, dvec3 &pos, dvec3 &norm, double &depth) {
