@@ -73,18 +73,26 @@ void UpdatePhysics(const double t, const double dt) {
     }
   }
   // Integrate
+  /*for (auto &e : physicsScene) {
+	  e->Render();
+	  // calcualte velocity from current and previous position
+	  dvec3 velocity = e->position - e->prev_position;
+	  // set previous position to current position
+	  e->prev_position = e->position;
+	  // position += v + a * (dt^2)
+	  e->position += velocity + (e->forces + gravity) * pow(dt, 2);
+	  e->forces = dvec3(0);
+	  if (e->position.y <= 0.0f) {
+		  //  e->prev_position = e->position + (e->position - e->prev_position);
+	  }
+  }
+  */
   for (auto &e : physicsScene) {
-    e->Render();
-    // calcualte velocity from current and previous position
-    dvec3 velocity = e->position - e->prev_position;
-    // set previous position to current position
-    e->prev_position = e->position;
-    // position += v + a * (dt^2)
-    e->position += velocity + (e->forces + gravity) * pow(dt, 2);
-    e->forces = dvec3(0);
-    if (e->position.y <= 0.0f) {
-      //  e->prev_position = e->position + (e->position - e->prev_position);
-    }
+	  e->Render();
+	  dvec3 force = e->position - e->position[0];
+	  double magnitude = force.length();
+	  magnitude = real_abs(magnitude - restLength);
+	  magnitude *= springConstant;
   }
 }
 

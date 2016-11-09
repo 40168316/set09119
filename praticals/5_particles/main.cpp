@@ -16,7 +16,7 @@ static unique_ptr<Entity> floorEnt;
 
 unique_ptr<Entity> CreateParticle() {
   unique_ptr<Entity> ent(new Entity());
-  ent->SetPosition(vec3(0, 5.0 + (double)(rand() % 200) / 20.0, 0));
+  ent->SetPosition(vec3(-5.0 + (double)(rand() % 200) / 20.0, 2, 0));
   unique_ptr<Component> physComponent(new cPhysics());
   unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
   renderComponent->SetColour(phys::RandomColour());
@@ -47,7 +47,7 @@ bool update(double delta_time) {
 
 bool load_content() {
   phys::Init();
-  for (size_t i = 0; i < 4; i++) {
+  for (size_t i = 0; i < 6; i++) {
     SceneList.push_back(move(CreateParticle()));
   }
   floorEnt = unique_ptr<Entity>(new Entity());
