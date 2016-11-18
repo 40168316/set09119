@@ -1,13 +1,13 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <graphics_framework.h>
 #include <phys_utils.h>
-//#include "main.h"
 
 using namespace std;
 using namespace graphics_framework;
 using namespace glm;
-#define physics_tick 1.0 / 60.0
 
 bool load_content() {
 	phys::Init();
