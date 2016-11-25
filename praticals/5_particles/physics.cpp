@@ -51,6 +51,8 @@ void cPhysics::SetParent(Entity *p) {
 
 void cPhysics::AddImpulse(const glm::vec3 &i) { forces += i; }
 
+
+
 void UpdatePhysics(const double t, const double dt) {
   std::vector<collisionInfo> collisions;
   // check for collisions
@@ -73,7 +75,7 @@ void UpdatePhysics(const double t, const double dt) {
     }
   }
   // Integrate
-  /*
+  
   for (auto &e : physicsScene) {
 	  e->Render();
 	  // calcualte velocity from current and previous position
@@ -87,21 +89,7 @@ void UpdatePhysics(const double t, const double dt) {
 		  e->prev_position = e->position + (e->position - e->prev_position);
 	  }
   }
-  */
   
-  for (auto &e : physicsScene) {
-	  e->Render();
-	  double restLength = 0;
-	  double springConstant = 1000.0;
-	  e->forces = e->position - e->position[0];
-	  dvec3 velocity = e->position - e->prev_position;
-	  double magnitude = e->forces.length();
-	  magnitude = abs(magnitude - restLength) * springConstant;
-	  //magnitude *= springConstant;
-	  e->forces = normalize(e->forces);
-	  e->forces *= -(magnitude);
-	  e->position += velocity *(e->forces + gravity) * pow(dt, 2);
-  }
 }
 
 void InitPhysics() {}

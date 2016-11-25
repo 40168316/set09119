@@ -27,10 +27,20 @@ unique_ptr<Entity> CreateParticle() {
 }
 
 bool update(double delta_time) {
+
   static double t = 0.0;
   static double accumulator = 0.0;
   accumulator += delta_time;
 
+  auto b = SceneList[SceneList.size() - 1].get()->GetComponents("Physics");
+  auto p = static_cast<cPhysics *>(b[0]);
+
+  if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
+  {
+
+	p->AddImpulse(vec3(0.0f, 200.0f, 0.0f));
+  }
+  cout << SceneList.size() << endl;
   while (accumulator > physics_tick) {
     UpdatePhysics(t, physics_tick);
     accumulator -= physics_tick;
