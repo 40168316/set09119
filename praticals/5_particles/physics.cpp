@@ -88,9 +88,9 @@ void UpdatePhysics(const double t, const double dt) {
 	  if (e->position.y <= 0.0f) {
 		  e->prev_position = e->position + (e->position - e->prev_position);
 	  }
-  }
-  
+  } 
 }
+
 
 void InitPhysics() {}
 
@@ -128,3 +128,32 @@ cSphereCollider::~cSphereCollider() {}
 cPlaneCollider::cPlaneCollider() : normal(dvec3(0, 1.0, 0)), cCollider("PlaneCollider") {}
 
 cPlaneCollider::~cPlaneCollider() {}
+
+ParticleSpring::ParticleSpring(cPhysics * other, double springConstant, double restLength) : other(other), springConstant(springConstant), restLength(restLength)
+{
+}
+
+ParticleSpring::ParticleSpring()
+{
+}
+
+void ParticleSpring::updateForce(cPhysics *particle, double duration)
+{
+	// Calculate the vector of the spring
+	dvec3 force;
+	force = particle->position;
+	force -= other->position;
+
+	// Calculate the magnitude of the force
+	float magnitude = length(force);
+
+	magnitude = abs(magnitude - restLength);
+	magnitude *= springConstant;
+
+	// Calculate the final force and apply it
+	force = normalize(force);
+	force *= -magnitude;
+	particle->AddImpulse(force);
+	other->AddImpulse(-force);
+
+}

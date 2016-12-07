@@ -61,6 +61,29 @@ public:
 private:
 };
 
+class ParticleSpring
+{
+	/** The particle at the other end of the spring. */
+	cPhysics *other;
+
+	/** Holds the sprint constant. */
+	double springConstant;
+
+	/** Holds the rest length of the spring. */
+	double restLength;
+
+public:
+
+	/** Creates a new spring with the given parameters. */
+	ParticleSpring(cPhysics *other,
+		double springConstant, double restLength);
+
+	ParticleSpring();
+
+	/** Applies the spring force to the given particle. */
+	virtual void updateForce(cPhysics *particle, double duration);
+};
+
 struct collisionInfo {
   const cCollider *c1;
   const cCollider *c2;

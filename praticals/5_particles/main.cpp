@@ -12,11 +12,17 @@ using namespace glm;
 #define physics_tick 1.0 / 60.0
 
 static vector<unique_ptr<Entity>> SceneList;
-static unique_ptr<Entity> floorEnt;
+vector<ParticleSpring> springs;
+ParticleSpring ps;
 
-unique_ptr<Entity> CreateParticle() {
+//static vector<unique_ptr<Entity>> SceneList;
+static unique_ptr<Entity> floorEnt;
+int x = 0 , y = 1, z = 0;
+
+unique_ptr<Entity> CreateParticle(int i) {
   unique_ptr<Entity> ent(new Entity());
-  ent->SetPosition(vec3(-5.0 + (double)(rand() % 200) / 20.0, 2, 0));
+  //ent->SetPosition(vec3(0, 5.0 + (double)(rand() % 200) / 20.0, 0));
+  ent->SetPosition(vec3(i * -5, y, z));
   unique_ptr<Component> physComponent(new cPhysics());
   unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
   renderComponent->SetColour(phys::RandomColour());
@@ -26,7 +32,8 @@ unique_ptr<Entity> CreateParticle() {
   return ent;
 }
 
-bool update(double delta_time) {
+bool update(double delta_time) 
+{
 
   static double t = 0.0;
   static double accumulator = 0.0;
@@ -37,36 +44,64 @@ bool update(double delta_time) {
 
   if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
   {
-
 	p->AddImpulse(vec3(0.0f, 200.0f, 0.0f));
   }
-  cout << SceneList.size() << endl;
+
+
+  // Update spring forces
+  for (int i = 0; i < springs.size() - 1; i++)
+  {
+	  cout << 1 << endl;
+	  auto b = SceneList[i].get()->GetComponents("Physics");
+	  auto p = static_cast<cPhysics *>(b[0]);
+	  springs[i + 1].updateForce(p, 1.0);
+	  cout << 2 << endl;
+	  //springs[i + 1].updateForce(p, 1.0);
+
+  }
+
   while (accumulator > physics_tick) {
     UpdatePhysics(t, physics_tick);
     accumulator -= physics_tick;
     t += physics_tick;
   }
 
+
+
+
   for (auto &e : SceneList) {
     e->Update(delta_time);
   }
-
-  phys::Update(delta_time);
-  return true;
-}
-
-bool load_content() {
-  phys::Init();
-  for (size_t i = 0; i < 6; i++) {
-    SceneList.push_back(move(CreateParticle()));
-  }
-  floorEnt = unique_ptr<Entity>(new Entity());
+																								  
+  phys::Update(delta_time);																		  
+  return true;																					  
+}																								  
+																								  
+bool load_content() {																			  
+  phys::Init();																					  
+  // The creation of particles																	  
+  for (size_t i = 0; i < 6; i++) {																  
+    SceneList.push_back(move(CreateParticle(i)));												  
+  }																								  
+  cout << SceneList[1]->GetPosition() << endl;													  
+  floorEnt = unique_ptr<Entity>(new Entity());													  
   floorEnt->AddComponent(unique_ptr<Component>(new cPlaneCollider()));
 
-  phys::SetCameraPos(vec3(20.0f, 10.0f, 20.0f));
-  phys::SetCameraTarget(vec3(0, 10.0f, 0));
-  InitPhysics();
-  return true;
+  for (int i = 0; i < SceneList.size(); i++)
+  {
+		
+	  auto b = SceneList[i].get()->GetComponents("Physics");
+	  auto p = static_cast<cPhysics *>(b[0]); // Get physics component
+	  cout << p->position << endl;
+	  ps = ParticleSpring(p, 20.0, 2.0);
+
+	  springs.push_back(ps);
+  }
+
+  phys::SetCameraPos(vec3(20.0f, 10.0f, 20.0f));												  
+  phys::SetCameraTarget(vec3(0, 10.0f, 0));														  
+  InitPhysics();																				  
+  return true;																					  
 }
 
 bool render() {

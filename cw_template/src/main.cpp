@@ -4,10 +4,15 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <graphics_framework.h>
 #include <phys_utils.h>
+#include "stdio.h"
+#include "stdlib.h"
+#include "math.h"
+#include "particlelib.h"
 
 using namespace std;
 using namespace graphics_framework;
 using namespace glm;
+using namespace phys;
 
 bool load_content() {
 	phys::Init();
