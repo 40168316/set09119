@@ -3,16 +3,15 @@
 
 class cPhysics : public Component {
 public:
-  cPhysics();
-  ~cPhysics();
-  glm::vec3 position;
-  glm::vec3 prev_position;
-  glm::dvec3 forces;
-  double mass;
-  virtual void Update(double delta);
-  virtual void SetParent(Entity *p);
-  virtual void AddImpulse(const glm::vec3 &i);
-
+	cPhysics();
+	~cPhysics();
+	glm::vec3 position;
+	glm::vec3 prev_position;
+	glm::dvec3 forces;
+	double mass;
+	virtual void Update(double delta);
+	virtual void SetParent(Entity *p);
+	virtual void AddImpulse(const glm::vec3 &i);
 private:
 };
 class cParticle : public cPhysics {
@@ -60,6 +59,7 @@ public:
 
 private:
 };
+
 
 class ParticleSpring
 {
