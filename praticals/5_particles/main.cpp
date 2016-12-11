@@ -17,16 +17,15 @@ ParticleSpring ps;
 
 //static vector<unique_ptr<Entity>> SceneList;
 static unique_ptr<Entity> floorEnt;
-int x = 0 , y = 0, z = 0;
+int xcoord, ycoord, zcoord, xposition, yposition, zposition;
 
 // Creation of partical method
-unique_ptr<Entity> CreateParticle(int x, int y, int z) {
+unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, int xcoord, int ycoord, int zcoord) {
   // Creation of ent which is a new entity which stores all the information like posiition and rotation
   unique_ptr<Entity> ent(new Entity());
   //ent->SetPosition(vec3(0, 5.0 + (double)(rand() % 200) / 20.0, 0));
   // Set the position of the entity
-
-  ent->SetPosition(vec3(x, y, z));
+  ent->SetPosition(vec3(xposition, yposition, zposition));
   // Create a new physics component which deals with all the physics
   unique_ptr<Component> physComponent(new cPhysics());
   // Create a sphere object
@@ -34,20 +33,20 @@ unique_ptr<Entity> CreateParticle(int x, int y, int z) {
   // Set the colour of the sphere
   renderComponent->SetColour(phys::RandomColour());
   phys::RGBAInt32 colour = BLACK;
-  if (z <2 || z >28 || x < 2 || x > 28) {
+  if (zcoord <1 || zcoord >5 || xcoord < 1 || xcoord > 5) {
 	  renderComponent->SetColour(colour = BLUE);
   }
-  else if (z < 7 || z >23 || x < 7 || x > 23)
+  else if (zcoord < 2 || zcoord >4 || xcoord < 2 || xcoord > 4)
   {
 	  renderComponent->SetColour(colour = YELLOW);
   }
-  else if (z < 12 || z >18 || x < 12 || x > 18) 
+  else if (zcoord < 3 || zcoord >3 || xcoord < 3 || xcoord > 3)
   {
 	  renderComponent->SetColour(colour = GREEN);
   }
   else 
   {
-	  renderComponent->SetColour(colour = RED);
+	  renderComponent->SetColour(colour = WHITE);
   }
   // Add the physics component to the entity
   ent->AddComponent(physComponent);
@@ -79,21 +78,17 @@ bool update(double delta_time)
   }
 
   // Update spring forces
-  for (int i = 0; i < 7 - 1; i++)
+  for (int i = 0; i < 48; i++)
   {
-	  // Looping through all the particals and adding the spring forces
-	  auto b = SceneList[i].get()->GetComponents("Physics");
-	  auto p = static_cast<cPhysics *>(b[0]);
-	  springs[i + 1].updateForce(p, 1.0);
+	  if ((i != 6 && i != 13 && i != 20 && i != 27 && i != 34 && i !=41))
+	  {
+		  // Looping through all the particals and adding the spring forces
+		  auto b = SceneList[i].get()->GetComponents("Physics");
+		  auto p = static_cast<cPhysics *>(b[0]);
+		  springs[i + 1].updateForce(p, 1.0);
+	  }
   }
 
-  for (int i = 7; i < 14 - 1; i++)
-  {
-	  // Looping through all the particals and adding the spring forces
-	  auto b = SceneList[i].get()->GetComponents("Physics");
-	  auto p = static_cast<cPhysics *>(b[0]);
-	  springs[i + 1].updateForce(p, 1.0);
-  }
   // If time passed is greater is greater than constant physics tick
   while (accumulator > physics_tick) {
 	// Update tick until it is higher than accumulator
@@ -107,68 +102,54 @@ bool update(double delta_time)
     e->Update(delta_time);
   }
 
-  for (x = 0; x < 7; x++) {
-	  for (int z = 0; z < 7; z++) {
-		  if (x < 1 || x > 34 ) {
-			  auto c = SceneList[x,z].get()->GetComponents("Physics");
-			  auto r = static_cast<cPhysics *>(c[0]);
-			  r->position = r->prev_position;
-		  }
-	  }
-  }
+ for (int x = 0; x < 49; x++) {
+	 if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x==21 || x ==27 || x==28 || x==34 || x==35) {
+		auto c = SceneList[x].get()->GetComponents("Physics");
+		auto r = static_cast<cPhysics *>(c[0]);
+		r->position = r->prev_position;
+	}
+ }
   // Update scene																								  
   phys::Update(delta_time);																		  
   return true;																					  
 }																								  
 																								  
 bool load_content() {																			  
-  phys::Init();																					  
+  phys::Init();	
 // The creation of particles - For i, which is particle number
-  for (x = 0; x < 7; x++) {
+  for (int x = 0; x < 7; x++) {
 	  // Loop for increasing z
 	  for (int z = 0; z < 7; z++) {
-		  SceneList.push_back(move(CreateParticle(x * 5, y = 9, z * 5)));
+		  unique_ptr<Entity> particle = CreateParticle(xposition = x * 5, yposition = 9, zposition = z * 5, xcoord = x, ycoord = 9, zcoord = z);
+		  auto p = static_cast<cPhysics *>(particle->GetComponents("Physics")[0]);
+		  SceneList.push_back(move(particle));
+
+		  ps = ParticleSpring(p, 20.0, 2.0);
+		  // Spring is then moved
+		  springs.push_back(ps);
+		  cout << "Coord = " << xcoord << " " << ycoord << " " << zcoord << " at Position = " << xposition  << " " << yposition << " " << zposition << endl;
 	  }
   }
   cout << SceneList[1]->GetPosition() << endl;
   floorEnt = unique_ptr<Entity>(new Entity());
   floorEnt->AddComponent(unique_ptr<Component>(new cPlaneCollider()));
 
-
-//Creation of spring
-  for (int i = 0; i < 7; i++)
-  {
-	 // for (int z = 0; z < SceneList.size(); z++)
-	  //{
-		  auto b = SceneList[i].get()->GetComponents("Physics");
-		  auto p = static_cast<cPhysics *>(b[0]); // Get physics component
-		  cout << p->position << endl;
-		  // Particle spring assigned values of springconstant and restlength
-		  ps = ParticleSpring(p, 20.0, 2.0);
-		  // Spring is then moved
-		  springs.push_back(ps);
-	  //}
-  }
-  
-  for (int i = 7; i < 14; i++)
-  {
-	  // for (int z = 0; z < SceneList.size(); z++)
-	  //{
-	  auto b = SceneList[i].get()->GetComponents("Physics");
-	  auto p = static_cast<cPhysics *>(b[0]); // Get physics component
-	  cout << p->position << endl;
-	  // Particle spring assigned values of springconstant and restlength
-	  ps = ParticleSpring(p, 20.0, 2.0);
-	  // Spring is then moved
-	  springs.push_back(ps);
-	  //}
-  }
-  
-
   phys::SetCameraPos(vec3(-20.0f, 30.0f, -20.0f));												  
   phys::SetCameraTarget(vec3(0, 10.0f, 0));														  
   InitPhysics();																				  
   return true;																					  
+}
+
+cPhysics *getParticle(int xcoord, int zcoord)
+{
+	auto p = static_cast<cPhysics *>(SceneList[xcoord * 7 + zcoord]->GetComponents("Physics")[0]);
+	return p;
+}
+
+ParticleSpring getSpring(int xcoord, int zcoord)
+{
+	auto p = springs[xcoord * 7 + zcoord];
+	return p;
 }
 
 // Render method
