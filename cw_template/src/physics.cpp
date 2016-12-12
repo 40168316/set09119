@@ -78,6 +78,10 @@ void UpdatePhysics(const double t, const double dt) {
   
   for (auto &e : physicsScene) {
 	  e->Render();
+	  if (e->makefixed == true) 
+	  {
+		  continue;
+	  }
 	  // calcualte velocity from current and previous position
 	  dvec3 velocity = e->position - e->prev_position;
 	  // set previous position to current position

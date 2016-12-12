@@ -12,12 +12,25 @@ using namespace glm;
 #define physics_tick 1.0 / 60.0
 
 static vector<unique_ptr<Entity>> SceneList;
+static vector<unique_ptr<Entity>> Planes;
+
 vector<ParticleSpring> springs;
 ParticleSpring ps;
+
+// A library of meshes
+map<string, mesh> meshes;
 
 //static vector<unique_ptr<Entity>> SceneList;
 static unique_ptr<Entity> floorEnt;
 int xcoord, ycoord, zcoord, xposition, yposition, zposition;
+
+free_camera freecam;
+target_camera targetcam;
+int cameraID;
+// Used for the free camera
+double xpos = 0.0f;
+double ypos = 0.0f;
+int loops = 0;
 
 // Creation of partical method
 unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, int xcoord, int ycoord, int zcoord) {
@@ -57,37 +70,169 @@ unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, i
   return ent;
 }
 
-// Update method
-bool update(double delta_time) 
+unique_ptr<Entity> CreatePlane(int xpos, int ypos, int zpos)
 {
-  // Variables used for time
-  static double t = 0.0;
-  static double accumulator = 0.0;
-  //
-  accumulator += delta_time;
+	unique_ptr<Entity> ent(new Entity());
+	ent->SetPosition(vec3(xpos, ypos, zpos));
+	unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
+}
 
-  // b gets the physics components p which is the actual physics component
-  auto b = SceneList[SceneList.size() - 1].get()->GetComponents("Physics");
-  auto p = static_cast<cPhysics *>(b[0]);
+// Update method
+bool update(float delta_time)
+{
+	// Target Camera Positons
+	vec3 v1 = vec3(-20, 20, -20);
+	vec3 v2 = vec3(-20, 20, 60);
+	vec3 v3 = vec3(60, 20, -20);
+	vec3 v4 = vec3(60, 20, 60);
 
-  // If up key is pressed then add impulse
-  if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
-  {
-	// The impulse adds to the y axis
-	p->AddImpulse(vec3(0.0f, 200.0f, 0.0f));
-  }
+	// Buttons pressed to move target camera
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_1))
+	{
+		// Move the target camera to position vector1
+		targetcam.set_position(v1);
+		targetcam.set_target(vec3(10.0f, 15.0f, 10.0f));
+		// Set camera ID to 0 to use the target camera
+		cameraID = 0;
+	}
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_2))
+	{
+		// Move the target camera to position vector1
+		targetcam.set_position(v2);
+		targetcam.set_target(vec3(10.0f, 15.0f, 10.0f));
+		// Set camera ID to 0 to use the target camera
+		cameraID = 0;
+	}
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_3))
+	{
+		// Move the target camera to position vector1
+		targetcam.set_position(v3);
+		targetcam.set_target(vec3(10.0f, 15.0f, 10.0f));
+		// Set camera ID to 0 to use the target camera
+		cameraID = 0;
+	}
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_4))
+	{
+		// Move the target camera to position vector1
+		targetcam.set_position(v4);
+		targetcam.set_target(vec3(10.0f, 15.0f, 10.0f));
+		// Set camera ID to 0 to use the target camera
+		cameraID = 0;
+	}
 
-  // Update spring forces
-  for (int i = 0; i < 48; i++)
-  {
-	  if ((i != 6 && i != 13 && i != 20 && i != 27 && i != 34 && i !=41))
-	  {
-		  // Looping through all the particals and adding the spring forces
-		  auto b = SceneList[i].get()->GetComponents("Physics");
-		  auto p = static_cast<cPhysics *>(b[0]);
-		  springs[i + 1].updateForce(p, 1.0);
-	  }
-  }
+	if (cameraID == 0)
+	{
+		glfwSetInputMode(renderer::get_window(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		targetcam.update(delta_time);
+		phys::SetCameraTarget(targetcam.get_target());
+		phys::SetCameraPos(targetcam.get_position());
+	}
+
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_F))
+	{
+		cameraID = 1;
+		// Mouse cursor is disabled and used to rotate freecam
+		glfwSetInputMode(renderer::get_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	if (cameraID == 1)
+	{
+		//Get mouse position for freecam
+		double deltax, deltay;
+		glfwGetCursorPos(renderer::get_window(), &deltax, &deltay);
+		double tempx = deltax;
+		double tempy = deltay;
+		deltax -= xpos;
+		deltay -= ypos;
+		double ratio_width = (double)renderer::get_screen_width() / (double)renderer::get_screen_height();
+		double ratio_height = 1.0 / ratio_width;
+		deltax *= ratio_width * delta_time / 10;
+		deltay *= -ratio_height * delta_time / 10;
+		//Rotate freecam based on the mouse coordinates
+		freecam.rotate(deltax, deltay);
+		// set last cursor pos
+		xpos = tempx;
+		ypos = tempy;
+		//Movement (freecam)
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_W))
+		{
+			freecam.move(vec3(0.0f, 0.0f, 10.0f) * delta_time);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_S))
+		{
+			freecam.move(vec3(0.0f, 0.0f, -10.0f) * delta_time);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_A))
+		{
+			freecam.move(vec3(-10.0f, 0.0f, 0.0f) * delta_time);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_D))
+		{
+			freecam.move(vec3(10.0f, 0.0f, 0.0f) * delta_time);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
+		{
+			freecam.move(vec3(0.0f, 10.0f, 0.0f) * delta_time);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN))
+		{
+			freecam.move(vec3(0.0f, -10.0f, 0.0f) * delta_time);
+		}
+		//Update freecam
+		freecam.update(delta_time);
+		phys::SetCameraTarget(freecam.get_target());
+		phys::SetCameraPos(freecam.get_position());
+	}
+
+	// Variables used for time
+	static double t = 0.0;
+	static double accumulator = 0.0;
+	//
+	accumulator += delta_time;
+
+	// b gets the physics components p which is the actual physics component
+	auto b = SceneList[SceneList.size() - 1].get()->GetComponents("Physics");
+	auto p = static_cast<cPhysics *>(b[0]);
+
+	// If up key is pressed then add impulse
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
+	{
+		// The impulse adds to the y axis
+		p->AddImpulse(vec3(0.0f, 200.0f, 0.0f));
+	}
+
+	// Update spring forces
+	//for (int i = 0; i < 48; i++)
+	//{
+	//    if ((i != 6 && i != 13 && i != 20 && i != 27 && i != 34 && i !=41))
+	//    {
+	//	    // Looping through all the particals and adding the spring forces
+	//	    auto b = SceneList[i].get()->GetComponents("Physics");
+	//	    auto p = static_cast<cPhysics *>(b[0]);
+	//	    springs[i + 1].updateForce(p, 1.0);
+	//    }
+	//}
+	for (int i = 7; i < 36; i+=7)
+	{
+		for (int j = i; j < i+6; j++)
+		{
+			// Looping through all the particals and adding the spring forces
+			auto b = SceneList[j].get()->GetComponents("Physics");
+			auto p = static_cast<cPhysics *>(b[0]);
+			springs[j + 1].updateForce(p, 1.0);
+		}	
+	}
+	for (int j = 1; j < 6; j++) {
+		for (int i = j; i < 42; i += 7) {
+			auto b = SceneList[i].get()->GetComponents("Physics");
+			auto p = static_cast<cPhysics *>(b[0]);
+			//if (i + 6 < 49)
+			{
+				springs[i + 7].updateForce(p, 1.0);
+			}
+			cout << i << endl;
+		}
+	}
 
   // If time passed is greater is greater than constant physics tick
   while (accumulator > physics_tick) {
@@ -101,15 +246,15 @@ bool update(double delta_time)
   for (auto &e : SceneList) {
     e->Update(delta_time);
   }
-
- // Keep balls at edge of trampoline stationary
- for (int x = 0; x < 49; x++) {
-	 if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x==21 || x ==27 || x==28 || x == 34 || x == 35) {
-		auto c = SceneList[x].get()->GetComponents("Physics");
-		auto r = static_cast<cPhysics *>(c[0]);
-		r->position = r->prev_position;
-	}
- }
+	// Keep balls at edge of trampoline stationary
+	for (int x = 0; x < 49; x++) {
+		if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x ==21|| x == 27 || x == 28 || x == 34 || x == 35) {
+			auto c = SceneList[x].get()->GetComponents("Physics");
+			auto r = static_cast<cPhysics *>(c[0]);
+			//r->position = r->prev_position;
+			r->makefixed = true;
+		}
+	}	
   // Update scene																								  
   phys::Update(delta_time);																		  
   return true;																					  
@@ -122,12 +267,14 @@ bool load_content() {
 	  // Loop for increasing z
 	  for (int z = 0; z < 7; z++) {
 		  // Create a new particle by calling the particle method
-		  unique_ptr<Entity> particle = CreateParticle(xposition = x * 5, yposition = 9, zposition = z * 5, xcoord = x, ycoord = 9, zcoord = z);
+		  unique_ptr<Entity> particle = CreateParticle(xposition = x * 5, yposition = 19, zposition = z * 5, xcoord = x, ycoord = 19, zcoord = z);
 		  // Get the physics components of the particle
 		  auto p = static_cast<cPhysics *>(particle->GetComponents("Physics")[0]);
+		  // Add to scene list
 		  SceneList.push_back(move(particle));
 		  // Create the spring
-		  ps = ParticleSpring(p, 20.0, 2.0);
+		  // Old values are 20.0 and 2.0 - might need to change
+		  ps = ParticleSpring(p, 40.0, 1.0);
 		  // Add the spring ps to the springs vector
 		  springs.push_back(ps);
 		  cout << "Coord = " << xcoord << " " << ycoord << " " << zcoord << " at Position = " << xposition  << " " << yposition << " " << zposition << endl;
@@ -137,8 +284,13 @@ bool load_content() {
   floorEnt = unique_ptr<Entity>(new Entity());
   floorEnt->AddComponent(unique_ptr<Component>(new cPlaneCollider()));
 
-  phys::SetCameraPos(vec3(-20.0f, 30.0f, -20.0f));												  
-  phys::SetCameraTarget(vec3(0, 10.0f, 0));														  
+  meshes["plane"] = mesh(geometry_builder::create_box());
+  meshes["plane"].get_transform().position = vec3(0.0f, 5.0f, 0.0f);
+  Planes.push_back()
+
+
+  targetcam.set_position(vec3(-20.0f, 30.0f, -20.0f));
+  targetcam.set_target(vec3(10.0f, 15.0f, 10.0f));	
   InitPhysics();																				  
   return true;																					  
 }
@@ -148,6 +300,10 @@ bool render() {
   // For everything in the scenelist render
   for (auto &e : SceneList) {
     e->Render();
+  }
+
+  for (auto &e : meshes) {
+	  e->Render();
   }
   // Draw the scene
   phys::DrawScene();
