@@ -102,8 +102,9 @@ bool update(double delta_time)
     e->Update(delta_time);
   }
 
+ // Keep balls at edge of trampoline stationary
  for (int x = 0; x < 49; x++) {
-	 if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x==21 || x ==27 || x==28 || x==34 || x==35) {
+	 if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x==21 || x ==27 || x==28 || x == 34 || x == 35) {
 		auto c = SceneList[x].get()->GetComponents("Physics");
 		auto r = static_cast<cPhysics *>(c[0]);
 		r->position = r->prev_position;
@@ -120,12 +121,14 @@ bool load_content() {
   for (int x = 0; x < 7; x++) {
 	  // Loop for increasing z
 	  for (int z = 0; z < 7; z++) {
+		  // Create a new particle by calling the particle method
 		  unique_ptr<Entity> particle = CreateParticle(xposition = x * 5, yposition = 9, zposition = z * 5, xcoord = x, ycoord = 9, zcoord = z);
+		  // Get the physics components of the particle
 		  auto p = static_cast<cPhysics *>(particle->GetComponents("Physics")[0]);
 		  SceneList.push_back(move(particle));
-
+		  // Create the spring
 		  ps = ParticleSpring(p, 20.0, 2.0);
-		  // Spring is then moved
+		  // Add the spring ps to the springs vector
 		  springs.push_back(ps);
 		  cout << "Coord = " << xcoord << " " << ycoord << " " << zcoord << " at Position = " << xposition  << " " << yposition << " " << zposition << endl;
 	  }
@@ -138,18 +141,6 @@ bool load_content() {
   phys::SetCameraTarget(vec3(0, 10.0f, 0));														  
   InitPhysics();																				  
   return true;																					  
-}
-
-cPhysics *getParticle(int xcoord, int zcoord)
-{
-	auto p = static_cast<cPhysics *>(SceneList[xcoord * 7 + zcoord]->GetComponents("Physics")[0]);
-	return p;
-}
-
-ParticleSpring getSpring(int xcoord, int zcoord)
-{
-	auto p = springs[xcoord * 7 + zcoord];
-	return p;
 }
 
 // Render method
