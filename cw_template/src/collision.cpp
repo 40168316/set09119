@@ -11,6 +11,7 @@ namespace collision {
 		const dvec3 d = p2 - p1;
 		const double distance = glm::length(d);
 		const double sumRadius = c1.radius + c2.radius;
+		//cout << "yo" << endl;
 		if (distance < sumRadius) {
 			depth = sumRadius - distance;
 			norm = -glm::normalize(d);
@@ -23,7 +24,7 @@ namespace collision {
 	bool IsColliding(const cSphereCollider &s, const cPlaneCollider &p, dvec3 &pos, dvec3 &norm, double &depth) {
 		const dvec3 sp = s.GetParent()->GetPosition();
 		const dvec3 pp = p.GetParent()->GetPosition();
-
+		cout << "hi" << endl;
 		// Calculate a vector from a point on the plane to the center of the sphere
 		const dvec3 vecTemp(sp - pp);
 

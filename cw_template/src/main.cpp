@@ -13,13 +13,13 @@ using namespace glm;
 
 static vector<unique_ptr<Entity>> SceneList;
 static vector<unique_ptr<Entity>> Planes;
+static vector<unique_ptr<Entity>> Balltodrop;
 
 vector<ParticleSpring> springs;
 ParticleSpring ps;
 
 // A library of meshes
 map<string, mesh> meshes;
-
 //static vector<unique_ptr<Entity>> SceneList;
 static unique_ptr<Entity> floorEnt;
 int xcoord, ycoord, zcoord, xposition, yposition, zposition;
@@ -36,13 +36,13 @@ int loops = 0;
 unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, int xcoord, int ycoord, int zcoord) {
   // Creation of ent which is a new entity which stores all the information like posiition and rotation
   unique_ptr<Entity> ent(new Entity());
-  //ent->SetPosition(vec3(0, 5.0 + (double)(rand() % 200) / 20.0, 0));
   // Set the position of the entity
   ent->SetPosition(vec3(xposition, yposition, zposition));
   // Create a new physics component which deals with all the physics
   unique_ptr<Component> physComponent(new cPhysics());
   // Create a sphere object
-  unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
+  unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::BOX));
+  ent->SetScale(vec3(5.0f, 0.5, 5.0f));
   // Set the colour of the sphere
   renderComponent->SetColour(phys::RandomColour());
   phys::RGBAInt32 colour = BLACK;
@@ -70,11 +70,46 @@ unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, i
   return ent;
 }
 
-unique_ptr<Entity> CreatePlane(int xpos, int ypos, int zpos)
-{
+unique_ptr<Entity> CreateBalltodrop(int xposition, int yposition, int zposition) {
+	// Creation of ent which is a new entity which stores all the information like posiition and rotation
 	unique_ptr<Entity> ent(new Entity());
-	ent->SetPosition(vec3(xpos, ypos, zpos));
+	// Set the position of the entity
+	ent->SetPosition(vec3(xposition, yposition, zposition));
+	// Create a new physics component which deals with all the physics
+	unique_ptr<Component> physComponent(new cPhysics());
+	// Create a sphere object
 	unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
+	// Set the colour of the sphere
+	renderComponent->SetColour(phys::RandomColour());
+	phys::RGBAInt32 colour = BLACK;
+	// Add the physics component to the entity
+	ent->AddComponent(physComponent);
+	// Add the sphere collider to the entity
+	ent->AddComponent(unique_ptr<Component>(new cSphereCollider()));
+	// Add the render component to the entity
+	ent->AddComponent(unique_ptr<Component>(move(renderComponent)));
+	return ent;
+}
+
+unique_ptr<Entity> CreatePlane(float xposition, float yposition, float zposition) {
+	// Creation of ent which is a new entity which stores all the information like posiition and rotation
+	unique_ptr<Entity> ent(new Entity());
+	//ent->SetPosition(vec3(0, 5.0 + (double)(rand() % 200) / 20.0, 0));
+	// Set the position of the entity
+	ent->SetPosition(vec3(xposition, yposition, zposition));
+	ent->SetScale(vec3(5.0f, 0.5, 5.0f));
+	// Create a new physics component which deals with all the physics
+	unique_ptr<Component> physComponent(new cPhysics());
+	unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::BOX));
+	// Set the colour of the sphere
+	renderComponent->SetColour(phys::RandomColour());
+	// Add the physics component to the entity
+	ent->AddComponent(physComponent);
+	// Add the sphere collider to the entity
+	ent->AddComponent(unique_ptr<Component>(new cSphereCollider()));
+	// Add the render component to the entity
+	ent->AddComponent(unique_ptr<Component>(move(renderComponent)));
+	return ent;
 }
 
 // Update method
@@ -220,6 +255,7 @@ bool update(float delta_time)
 			auto b = SceneList[j].get()->GetComponents("Physics");
 			auto p = static_cast<cPhysics *>(b[0]);
 			springs[j + 1].updateForce(p, 1.0);
+			//cout << SceneList[j].get()->GetPosition().y << endl;
 		}	
 	}
 	for (int j = 1; j < 6; j++) {
@@ -230,9 +266,16 @@ bool update(float delta_time)
 			{
 				springs[i + 7].updateForce(p, 1.0);
 			}
-			cout << i << endl;
+			//cout << i << endl;
 		}
 	}
+
+	/*for (int i = 7; i < 11; i++)
+	{
+		auto b = Planes[i].get()->GetComponents("Physics");
+		auto p = static_cast<cPhysics *>(b[0]);
+		springs[i + 1].updateForce(p, 1.0);
+	}*/
 
   // If time passed is greater is greater than constant physics tick
   while (accumulator > physics_tick) {
@@ -242,9 +285,17 @@ bool update(float delta_time)
     t += physics_tick;
   }
 
+
+
   // Update everything in the scenelist
   for (auto &e : SceneList) {
     e->Update(delta_time);
+  }
+  for (auto &e : Planes) {
+	  e->Update(delta_time);
+  }
+  for (auto &e : Balltodrop) {
+	  e->Update(delta_time);
   }
 	// Keep balls at edge of trampoline stationary
 	for (int x = 0; x < 49; x++) {
@@ -277,17 +328,30 @@ bool load_content() {
 		  ps = ParticleSpring(p, 40.0, 1.0);
 		  // Add the spring ps to the springs vector
 		  springs.push_back(ps);
-		  cout << "Coord = " << xcoord << " " << ycoord << " " << zcoord << " at Position = " << xposition  << " " << yposition << " " << zposition << endl;
+		  //cout << "Coord = " << xcoord << " " << ycoord << " " << zcoord << " at Position = " << xposition  << " " << yposition << " " << zposition << endl;
 	  }
   }
-  cout << SceneList[1]->GetPosition() << endl;
+  for (float i = 2.5f; i < 31.0f; i += 5.0f) {
+	  for (float j = 2.5f; j < 31.0f; j += 5.0f) {
+		  // Centre point, Scale
+		  //phys::DrawCube(glm::vec3(i, SceneList[t++].get()->GetPosition().y, j), glm::vec3(5.0f, 0.5f, 5.0f));
+		  unique_ptr<Entity> plane = CreatePlane(xposition = i, yposition = 19, zposition = j);
+		  auto p = static_cast<cPhysics *>(plane->GetComponents("Physics")[0]);
+		  // Add to scene list
+		  Planes.push_back(move(plane));
+	  }
+  }
+
+  for (float i = 5; i <24 ; i+=3)
+  {
+	  unique_ptr<Entity> ball = CreateBalltodrop(xposition = i, yposition = 29, zposition = i);
+	  auto p = static_cast<cPhysics *>(ball->GetComponents("Physics")[0]);
+	  // Add to scene list
+	  Balltodrop.push_back(move(ball));
+  }
+
   floorEnt = unique_ptr<Entity>(new Entity());
   floorEnt->AddComponent(unique_ptr<Component>(new cPlaneCollider()));
-
-  meshes["plane"] = mesh(geometry_builder::create_box());
-  meshes["plane"].get_transform().position = vec3(0.0f, 5.0f, 0.0f);
-  Planes.push_back()
-
 
   targetcam.set_position(vec3(-20.0f, 30.0f, -20.0f));
   targetcam.set_target(vec3(10.0f, 15.0f, 10.0f));	
@@ -297,14 +361,23 @@ bool load_content() {
 
 // Render method
 bool render() {
+	int t = 0;
   // For everything in the scenelist render
   for (auto &e : SceneList) {
     e->Render();
   }
-
-  for (auto &e : meshes) {
+  /*for (auto &e : Planes) {
+	  e->Render();
+  }*/
+  for (auto &e : Balltodrop) {
 	  e->Render();
   }
+  //for (float i = 2.5f; i < 31.0f; i += 5.0f) {
+	 // for (float j = 2.5f; j < 31.0f; j += 5.0f) {
+		//  // Centre point, Scale
+		//  phys::DrawCube(glm::vec3(i, SceneList[t++].get()->GetPosition().y, j), glm::vec3(5.0f, 0.5f, 5.0f));
+	 // }
+  //}
   // Draw the scene
   phys::DrawScene();
   return true;
