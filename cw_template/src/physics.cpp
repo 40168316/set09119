@@ -5,7 +5,7 @@ using namespace std;
 using namespace glm;
 static vector<cPhysics *> physicsScene;
 static vector<cCollider *> colliders;
-
+bool collisionbool = false;
 static dvec3 gravity = dvec3(0, -10.0, 0);
 
 void Resolve(const collisionInfo &ci) {
@@ -63,6 +63,8 @@ void UpdatePhysics(const double t, const double dt) {
     for (size_t i = 0; i < colliders.size(); ++i) {
       for (size_t j = i + 1; j < colliders.size(); ++j) {
         if (collision::IsColliding(*colliders[i], *colliders[j], pos, norm, depth)) {
+			//cout << "gottaya" << endl;
+			collisionbool = true;
           collisions.push_back({colliders[i], colliders[j], pos, norm, depth});
         }
       }
@@ -93,6 +95,7 @@ void UpdatePhysics(const double t, const double dt) {
 		  e->prev_position = e->position + (e->position - e->prev_position);
 	  }
   } 
+  //collisionbool = false;
 }
 
 
@@ -157,7 +160,15 @@ void ParticleSpring::updateForce(cPhysics *particle, double duration)
 	// Calculate the final force and apply it
 	force = normalize(force);
 	force *= -magnitude;
-	particle->AddImpulse(force);
-	other->AddImpulse(-force);
-
+	if (collisionbool == true) {
+		//cout << "hit" << endl;
+		particle->AddImpulse(force);
+		other->AddImpulse(-force);
+	}
+	else
+	{
+		//force = dvec3(0.0,0.0,0.0);
+		particle->AddImpulse(force*0.5);
+		other->AddImpulse(-force*0.5);
+	}
 }

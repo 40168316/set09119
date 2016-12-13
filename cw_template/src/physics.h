@@ -1,6 +1,6 @@
 #pragma once
 #include "game.h"
-
+extern bool collisionbool;
 class cPhysics : public Component {
 public:
 	cPhysics();
@@ -8,7 +8,7 @@ public:
 	glm::vec3 position;
 	glm::vec3 prev_position;
 	glm::dvec3 forces;
-	bool makefixed = false;
+	bool makefixed = true;
 	double mass;
 	virtual void Update(double delta);
 	virtual void SetParent(Entity *p);

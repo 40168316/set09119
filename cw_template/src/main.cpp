@@ -1,5 +1,6 @@
 #include "game.h"
 #include "physics.h"
+//#include "physics.cpp"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <graphics_framework.h>
@@ -31,7 +32,7 @@ int cameraID;
 double xpos = 0.0f;
 double ypos = 0.0f;
 int loops = 0;
-
+bool go = false;
 // Creation of partical method
 unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, int xcoord, int ycoord, int zcoord) {
   // Creation of ent which is a new entity which stores all the information like posiition and rotation
@@ -42,7 +43,9 @@ unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, i
   unique_ptr<Component> physComponent(new cPhysics());
   // Create a sphere object
   unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::BOX));
+  //ent->SetRotation((pi<float>(), vec3(0.0f, 0.0f, 1.0f)));
   ent->SetScale(vec3(5.0f, 0.5, 5.0f));
+  
   // Set the colour of the sphere
   renderComponent->SetColour(phys::RandomColour());
   phys::RGBAInt32 colour = BLACK;
@@ -222,7 +225,6 @@ bool update(float delta_time)
 	// Variables used for time
 	static double t = 0.0;
 	static double accumulator = 0.0;
-	//
 	accumulator += delta_time;
 
 	// b gets the physics components p which is the actual physics component
@@ -299,11 +301,19 @@ bool update(float delta_time)
   }
 	// Keep balls at edge of trampoline stationary
 	for (int x = 0; x < 49; x++) {
+		auto c = SceneList[x].get()->GetComponents("Physics");
+		auto r = static_cast<cPhysics *>(c[0]);
 		if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x ==21|| x == 27 || x == 28 || x == 34 || x == 35) {
-			auto c = SceneList[x].get()->GetComponents("Physics");
-			auto r = static_cast<cPhysics *>(c[0]);
+			
 			//r->position = r->prev_position;
 			r->makefixed = true;
+		}
+		else
+		{
+			if (collisionbool == true)
+			{
+				r->makefixed = false;
+			}
 		}
 	}	
   // Update scene																								  
@@ -342,12 +352,13 @@ bool load_content() {
 	  }
   }
 
-  for (float i = 5; i <24 ; i+=3)
+  for (float i = 5; i <24 ; i+=2)
   {
 	  unique_ptr<Entity> ball = CreateBalltodrop(xposition = i, yposition = 29, zposition = i);
 	  auto p = static_cast<cPhysics *>(ball->GetComponents("Physics")[0]);
 	  // Add to scene list
 	  Balltodrop.push_back(move(ball));
+	  p->makefixed = false;
   }
 
   floorEnt = unique_ptr<Entity>(new Entity());

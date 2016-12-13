@@ -26,7 +26,6 @@ namespace collision {
 
 		// Calculate a vector from a point on the plane to the center of the sphere
 		const dvec3 vecTemp(sp - pp);
-
 		// Calculate the distance: dot product of the new vector with the plane's normal
 		double distance = dot(vecTemp, p.normal);
 
@@ -34,9 +33,10 @@ namespace collision {
 			norm = p.normal;
 			pos = sp - norm * distance;
 			depth = s.radius - distance;
+			cout << "floorhit" << endl;
 			return true;
-		}
 
+		}
 		return false;
 	}
 
@@ -51,6 +51,7 @@ namespace collision {
 			PLANE,
 			SPHERE,
 		};
+
 		shape s1 = UNKOWN;
 		shape s2 = UNKOWN;
 		if (dynamic_cast<const cSphereCollider *>(&c1)) {
