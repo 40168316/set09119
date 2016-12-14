@@ -8,6 +8,7 @@ public:
 	glm::vec3 position;
 	glm::vec3 prev_position;
 	glm::dvec3 forces;
+	glm::dvec3 velocity;
 	bool makefixed = true;
 	double mass;
 	virtual void Update(double delta);
@@ -69,7 +70,7 @@ class ParticleSpring
 
 	/** Holds the sprint constant. */
 	double springConstant;
-
+	double damp = 40.0;
 	/** Holds the rest length of the spring. */
 	double restLength;
 

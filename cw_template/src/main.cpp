@@ -13,7 +13,6 @@ using namespace glm;
 #define physics_tick 1.0 / 60.0
 
 static vector<unique_ptr<Entity>> SceneList;
-static vector<unique_ptr<Entity>> Planes;
 static vector<unique_ptr<Entity>> Balltodrop;
 
 vector<ParticleSpring> springs;
@@ -32,20 +31,25 @@ int cameraID;
 double xpos = 0.0f;
 double ypos = 0.0f;
 int loops = 0;
-bool go = false;
+bool buttonpressed = false;
+bool buttonpressed2 = false;
+int buttonpressedtime = 0;
+
+vector <glm::vec3> grid;
+
 // Creation of partical method
 unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, int xcoord, int ycoord, int zcoord) {
   // Creation of ent which is a new entity which stores all the information like posiition and rotation
   unique_ptr<Entity> ent(new Entity());
   // Set the position of the entity
   ent->SetPosition(vec3(xposition, yposition, zposition));
+  ent->SetScale(vec3(1.0, 1.0, 1.0));
   // Create a new physics component which deals with all the physics
   unique_ptr<Component> physComponent(new cPhysics());
   // Create a sphere object
-  unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::BOX));
-  //ent->SetRotation((pi<float>(), vec3(0.0f, 0.0f, 1.0f)));
-  ent->SetScale(vec3(5.0f, 0.5, 5.0f));
+  unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
   
+  //ent->SetScale();
   // Set the colour of the sphere
   renderComponent->SetColour(phys::RandomColour());
   phys::RGBAInt32 colour = BLACK;
@@ -67,7 +71,10 @@ unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, i
   // Add the physics component to the entity
   ent->AddComponent(physComponent);
   // Add the sphere collider to the entity
-  ent->AddComponent(unique_ptr<Component>(new cSphereCollider()));
+  //ent->AddComponent(unique_ptr<Component>(new cSphereCollider()));
+  cSphereCollider *coll = new cSphereCollider();
+  coll->radius = 0.3f;
+  ent->AddComponent(unique_ptr<Component>(coll));
   // Add the render component to the entity
   ent->AddComponent(unique_ptr<Component>(move(renderComponent)));
   return ent;
@@ -119,7 +126,7 @@ unique_ptr<Entity> CreatePlane(float xposition, float yposition, float zposition
 bool update(float delta_time)
 {
 	// Target Camera Positons
-	vec3 v1 = vec3(-20, 20, -20);
+	vec3 v1 = vec3(-10.0f, 50.0f, -10.0f);
 	vec3 v2 = vec3(-20, 20, 60);
 	vec3 v3 = vec3(60, 20, -20);
 	vec3 v4 = vec3(60, 20, 60);
@@ -234,21 +241,20 @@ bool update(float delta_time)
 	// If up key is pressed then add impulse
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
 	{
-		// The impulse adds to the y axis
-		p->AddImpulse(vec3(0.0f, 200.0f, 0.0f));
+		buttonpressed = true;
+		buttonpressed2 = true;
 	}
 
-	// Update spring forces
-	//for (int i = 0; i < 48; i++)
-	//{
-	//    if ((i != 6 && i != 13 && i != 20 && i != 27 && i != 34 && i !=41))
-	//    {
-	//	    // Looping through all the particals and adding the spring forces
-	//	    auto b = SceneList[i].get()->GetComponents("Physics");
-	//	    auto p = static_cast<cPhysics *>(b[0]);
-	//	    springs[i + 1].updateForce(p, 1.0);
-	//    }
-	//}
+	if (buttonpressed == true && glfwGetKey(renderer::get_window(), GLFW_KEY_UP) == GLFW_RELEASE)
+	{
+		auto t = Balltodrop[0].get()->GetComponents("Physics");
+		auto g = static_cast<cPhysics *>(t[0]);
+		g->makefixed = false;
+		buttonpressedtime++;
+		buttonpressed = false;
+	}
+	
+
 	for (int i = 7; i < 36; i+=7)
 	{
 		for (int j = i; j < i+6; j++)
@@ -264,20 +270,9 @@ bool update(float delta_time)
 		for (int i = j; i < 42; i += 7) {
 			auto b = SceneList[i].get()->GetComponents("Physics");
 			auto p = static_cast<cPhysics *>(b[0]);
-			//if (i + 6 < 49)
-			{
-				springs[i + 7].updateForce(p, 1.0);
-			}
-			//cout << i << endl;
+			springs[i + 7].updateForce(p, 1.0);
 		}
 	}
-
-	/*for (int i = 7; i < 11; i++)
-	{
-		auto b = Planes[i].get()->GetComponents("Physics");
-		auto p = static_cast<cPhysics *>(b[0]);
-		springs[i + 1].updateForce(p, 1.0);
-	}*/
 
   // If time passed is greater is greater than constant physics tick
   while (accumulator > physics_tick) {
@@ -287,40 +282,37 @@ bool update(float delta_time)
     t += physics_tick;
   }
 
+  // Keep balls at edge of trampoline stationary
+  for (int x = 0; x < 49; x++) {
+	  auto c = SceneList[x].get()->GetComponents("Physics");
+	  auto r = static_cast<cPhysics *>(c[0]);
+	  if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x == 21 || x == 27 || x == 28 || x == 34 || x == 35) {
 
+		  //r->position = r->prev_position;
+		  r->makefixed = true;
+	  }
+	  else
+	  {
+		  if (collisionbool == true)
+		  {
+			  r->makefixed = false;
+		  }
+	  }
+  }
 
   // Update everything in the scenelist
   for (auto &e : SceneList) {
     e->Update(delta_time);
   }
-  for (auto &e : Planes) {
-	  e->Update(delta_time);
-  }
   for (auto &e : Balltodrop) {
 	  e->Update(delta_time);
   }
-	// Keep balls at edge of trampoline stationary
-	for (int x = 0; x < 49; x++) {
-		auto c = SceneList[x].get()->GetComponents("Physics");
-		auto r = static_cast<cPhysics *>(c[0]);
-		if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x ==21|| x == 27 || x == 28 || x == 34 || x == 35) {
-			
-			//r->position = r->prev_position;
-			r->makefixed = true;
-		}
-		else
-		{
-			if (collisionbool == true)
-			{
-				r->makefixed = false;
-			}
-		}
-	}	
+	
   // Update scene																								  
   phys::Update(delta_time);																		  
   return true;																					  
 }																								  
-																								  
+
 bool load_content() {																			  
   phys::Init();	
 // The creation of particles - For i, which is particle number
@@ -338,27 +330,14 @@ bool load_content() {
 		  ps = ParticleSpring(p, 40.0, 1.0);
 		  // Add the spring ps to the springs vector
 		  springs.push_back(ps);
-		  //cout << "Coord = " << xcoord << " " << ycoord << " " << zcoord << " at Position = " << xposition  << " " << yposition << " " << zposition << endl;
 	  }
   }
-  for (float i = 2.5f; i < 31.0f; i += 5.0f) {
-	  for (float j = 2.5f; j < 31.0f; j += 5.0f) {
-		  // Centre point, Scale
-		  //phys::DrawCube(glm::vec3(i, SceneList[t++].get()->GetPosition().y, j), glm::vec3(5.0f, 0.5f, 5.0f));
-		  unique_ptr<Entity> plane = CreatePlane(xposition = i, yposition = 19, zposition = j);
-		  auto p = static_cast<cPhysics *>(plane->GetComponents("Physics")[0]);
-		  // Add to scene list
-		  Planes.push_back(move(plane));
-	  }
-  }
+ 
 
-  for (float i = 5; i <24 ; i+=2)
+  //for (int i = 0; i < 20; i+=2)
   {
-	  unique_ptr<Entity> ball = CreateBalltodrop(xposition = i, yposition = 29, zposition = i);
-	  auto p = static_cast<cPhysics *>(ball->GetComponents("Physics")[0]);
-	  // Add to scene list
+	  unique_ptr<Entity> ball = CreateBalltodrop(10, 30, 10);
 	  Balltodrop.push_back(move(ball));
-	  p->makefixed = false;
   }
 
   floorEnt = unique_ptr<Entity>(new Entity());
@@ -377,20 +356,20 @@ bool render() {
   for (auto &e : SceneList) {
     e->Render();
   }
-  /*for (auto &e : Planes) {
-	  e->Render();
-  }*/
-  for (auto &e : Balltodrop) {
-	  e->Render();
+  if (buttonpressed2 == true)
+  {
+	  for (auto &e : Balltodrop) {
+		  e->Render();
+	  }
   }
-  //for (float i = 2.5f; i < 31.0f; i += 5.0f) {
-	 // for (float j = 2.5f; j < 31.0f; j += 5.0f) {
-		//  // Centre point, Scale
-		//  phys::DrawCube(glm::vec3(i, SceneList[t++].get()->GetPosition().y, j), glm::vec3(5.0f, 0.5f, 5.0f));
-	 // }
-  //}
+  grid.clear();
+  for (auto &e : SceneList) {
+	  grid.push_back(e->GetPosition());
+  }
+
   // Draw the scene
   phys::DrawScene();
+  phys::DrawGrid(&grid[0], 7 * 7, 7 ,phys::solid);
   return true;
 }
 

@@ -11,7 +11,6 @@ namespace collision {
 		const dvec3 d = p2 - p1;
 		const double distance = glm::length(d);
 		const double sumRadius = c1.radius + c2.radius;
-		//cout << "yo" << endl;
 		if (distance < sumRadius) {
 			depth = sumRadius - distance;
 			norm = -glm::normalize(d);
