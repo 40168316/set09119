@@ -77,18 +77,6 @@ bool update(double delta_time)
 	p->AddImpulse(vec3(0.0f, 200.0f, 0.0f));
   }
 
-  // Update spring forces
-  //for (int i = 0; i < 48; i++)
-  //{
-	 // if ((i != 6 && i != 13 && i != 20 && i != 27 && i != 34 && i !=41))
-	 // {
-		//  // Looping through all the particals and adding the spring forces
-		//  auto b = SceneList[i].get()->GetComponents("Physics");
-		//  auto p = static_cast<cPhysics *>(b[0]);
-		//  springs[i + 1].updateForce(p, 1.0);
-	 // }
-  //}
-
   // If time passed is greater is greater than constant physics tick
   while (accumulator > physics_tick) {
 	// Update tick until it is higher than accumulator
@@ -102,14 +90,6 @@ bool update(double delta_time)
     e->Update(delta_time);
   }
 
- // Keep balls at edge of trampoline stationary
- /*for (int x = 0; x < 49; x++) {
-	 if (x < 8 || x >40 || x == 13 || x == 14 || x == 20 || x==21 || x ==27 || x==28 || x == 34 || x == 35) {
-		auto c = SceneList[x].get()->GetComponents("Physics");
-		auto r = static_cast<cPhysics *>(c[0]);
-		r->position = r->prev_position;
-	}
- }*/
   // Update scene																								  
   phys::Update(delta_time);																		  
   return true;																					  
@@ -127,10 +107,6 @@ bool load_content() {
 		  auto p = static_cast<cPhysics *>(particle->GetComponents("Physics")[0]);
 		  SceneList.push_back(move(particle));
 		  // Create the spring
-		  //ps = ParticleSpring(p, 20.0, 2.0);
-		  // Add the spring ps to the springs vector
-		  //springs.push_back(ps);
-		  //cout << "Coord = " << xcoord << " " << ycoord << " " << zcoord << " at Position = " << xposition  << " " << yposition << " " << zposition << endl;
 	  }
   }
   floorEnt = unique_ptr<Entity>(new Entity());

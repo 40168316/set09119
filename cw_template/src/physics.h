@@ -1,6 +1,7 @@
 #pragma once
 #include "game.h"
 extern bool collisionbool;
+extern glm::vec3 collpos;
 class cPhysics : public Component {
 public:
 	cPhysics();

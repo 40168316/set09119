@@ -22,8 +22,7 @@ namespace collision {
 
 	bool IsColliding(const cSphereCollider &s, const cPlaneCollider &p, dvec3 &pos, dvec3 &norm, double &depth) {
 		const dvec3 sp = s.GetParent()->GetPosition();
-		const dvec3 pp = p.GetParent()->GetPosition();
-		//cout << "hi" << endl;
+		const dvec3 pp = p.GetParent()->GetPosition();	
 		// Calculate a vector from a point on the plane to the center of the sphere
 		const dvec3 vecTemp(sp - pp);
 
@@ -42,7 +41,7 @@ namespace collision {
 	}
 
 	bool IsColliding(const cPlaneCollider &c1, const cPlaneCollider &c2, dvec3 &pos, dvec3 &norm, double &depth) {
-		cout << "PLANE PLANE" << endl;
+		//cout << "PLANE PLANE" << endl;
 		return false;
 	}
 

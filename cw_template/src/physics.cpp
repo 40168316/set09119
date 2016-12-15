@@ -67,8 +67,9 @@ void UpdatePhysics(const double t, const double dt) {
 			{
 				if (collision::IsColliding(*colliders[i], *colliders[j], pos, norm, depth)) 
 				{
-					cout << "coll" << endl;
+					//cout << "coll" << endl;
 					collpos = pos;
+					cout << collpos << endl;
 					collisions.push_back({ colliders[i], colliders[j], pos, norm, depth });
 					collisionbool = true;
 				}
@@ -169,29 +170,6 @@ void ParticleSpring::updateForce(cPhysics *particle, double duration)
 	dampForce *= damp;
 	force -= dampForce;
 
-	//if (collpos.x > 0 && collpos.z> 0 && collpos.x <=10 && collpos.z <=10)
-	//{
-	//	//cout << "sup" << endl;
-	//	particle->AddImpulse(force);
-	//	other->AddImpulse(-force);
-	//}
-
 	particle->AddImpulse(force);
 	other->AddImpulse(-force);
-	//cout << "part" << particle->position << endl;
-	//cout << "other" << other->position << endl;
-	//cout << collpos << endl;
-	//particle->AddImpulse(force);
-	//other->AddImpulse(-force);
-	//if (collisionbool == true) {
-	//	//cout << "hit" << endl;
-	//	particle->AddImpulse(force);
-	//	other->AddImpulse(-force);
-	//}
-	//else
-	//{
-	//	//force = dvec3(0.0,0.0,0.0);
-	//	particle->AddImpulse(force*0.5);
-	//	other->AddImpulse(-force*0.5);
-	//}
 }
