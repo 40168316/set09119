@@ -79,7 +79,7 @@ public:
 
 class cShapeRenderer : public Component {
 public:
-  enum SHAPES { SPHERE, BOX };
+  enum SHAPES { SPHERE, BOX, PLANE };
   const SHAPES shape;
   void SetColour(const phys::RGBAInt32 c);
   cShapeRenderer(SHAPES shape);

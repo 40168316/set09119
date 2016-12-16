@@ -22,7 +22,7 @@ namespace collision {
 
 	bool IsColliding(const cSphereCollider &s, const cPlaneCollider &p, dvec3 &pos, dvec3 &norm, double &depth) {
 		const dvec3 sp = s.GetParent()->GetPosition();
-		const dvec3 pp = p.GetParent()->GetPosition();	
+		const dvec3 pp = p.GetParent()->GetPosition();
 		// Calculate a vector from a point on the plane to the center of the sphere
 		const dvec3 vecTemp(sp - pp);
 
@@ -71,22 +71,28 @@ namespace collision {
 			cout << "Routing Error" << endl;
 			return false;
 		}
-		if (s1 == PLANE) {
-			if (s2 == PLANE) {
+		if (s1 == PLANE)
+		{
+			if (s2 == PLANE) 
+			{
 				return IsColliding(dynamic_cast<const cPlaneCollider &>(c1), dynamic_cast<const cPlaneCollider &>(c2), pos, norm,
 					depth);
 			}
-			else {
+			else
+			{
 				return IsColliding(dynamic_cast<const cPlaneCollider &>(c1), dynamic_cast<const cSphereCollider &>(c2), pos, norm,
 					depth);
 			}
 		}
-		else {
-			if (s2 == PLANE) {
+		else 
+		{
+			if (s2 == PLANE) 
+			{
 				return IsColliding(dynamic_cast<const cSphereCollider &>(c1), dynamic_cast<const cPlaneCollider &>(c2), pos, norm,
 					depth);
 			}
-			else {
+			else 
+			{
 				return IsColliding(dynamic_cast<const cSphereCollider &>(c1), dynamic_cast<const cSphereCollider &>(c2), pos,
 					norm, depth);
 			}

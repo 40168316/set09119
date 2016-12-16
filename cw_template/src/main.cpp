@@ -69,13 +69,15 @@ unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, i
   // Create a new physics component which deals with all the physics like forces and mass
   unique_ptr<Component> physComponent(new cPhysics());
   // Create a sphere object as a particle
-  unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
+  unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::PLANE));
+  ent->SetScale(vec3(5.0, 0.0, 5.0));
   // Set the colour of the particle to a deafult black
   phys::RGBAInt32 colour = BLACK;
   // Set the colour of the particles depending on there posiiton
   // If the partciles are on the outside of the trampoline set their colour to blue
   if (zcoord <1 || zcoord >5 || xcoord < 1 || xcoord > 5) {
-	  renderComponent->SetColour(colour = BLUE);
+	  //ent->SetColour(colour = BLUE);
+	  ent->colour = BLUE;
   }
   // If the partciles are inbetween certain values then set the colour to yellow
   else if (zcoord < 2 || zcoord >4 || xcoord < 2 || xcoord > 4)
@@ -95,9 +97,7 @@ unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, i
   // Add the physics component to the entity
   ent->AddComponent(physComponent);
   // Add the sphere collider to the entity - C	ollider and particle are set to a scale of 0.3
-  cSphereCollider *coll = new cSphereCollider();
-  coll->radius = 0.3f;
-  ent->AddComponent(unique_ptr<Component>(coll));
+  ent->AddComponent(unique_ptr<Component>(new cPlaneCollider()));
   // Add the render component to the entity
   ent->AddComponent(unique_ptr<Component>(move(renderComponent)));
   // Return the complete entity
@@ -120,6 +120,9 @@ unique_ptr<Entity> CreateBalltodrop(int xposition, int yposition, int zposition)
 	ent->AddComponent(physComponent);
 	// Add the sphere collider to the entity
 	ent->AddComponent(unique_ptr<Component>(new cSphereCollider()));
+	/*cSphereCollider *coll = new cSphereCollider();
+	coll->radius = 0.3f;
+	ent->AddComponent(unique_ptr<Component>(coll));*/
 	// Add the render component to the entity
 	ent->AddComponent(unique_ptr<Component>(move(renderComponent)));
 	// Return the complete entity
@@ -301,6 +304,7 @@ bool update(float delta_time)
 			auto p = static_cast<cPhysics *>(b[0]);
 			// Updates the force between current particle and the next particle
 			collectionofindividualsprings[j + 1].updateForce(p, 1.0);
+			
 		}	
 	}
 
@@ -406,7 +410,6 @@ bool load_content() {
   }
 
   floorEnt = unique_ptr<Entity>(new Entity());
-  //floorEnt->SetPosition(vec3(0, 19, 0));
   floorEnt->AddComponent(unique_ptr<Component>(new cPlaneCollider()));
 
   // Set the target cameras starting posiitons and targets
@@ -448,6 +451,7 @@ bool render() {
 void main() {
   // Create application
   app application;
+  //application.set_initialise(initialise);
   // Set load content, update and render methods
   application.set_load_content(load_content);
   application.set_update(update);
