@@ -69,9 +69,7 @@ unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, i
 	// Create a new physics component which deals with all the physics like forces and mass
 	unique_ptr<Component> physComponent(new cPhysics());
 	// Create a sphere object as a particle
-	ent->SetScale(vec3(5.0, 0.0, 5.0));
 	unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
-	
 	// Set the colour of the particle to a deafult black
 	phys::RGBAInt32 colour = BLACK;
 	// Set the colour of the particles depending on there posiiton
@@ -355,13 +353,12 @@ bool update(float delta_time)
 	  }
   }
 
-	if (collpos.x > 0 && collpos.x <= 7.5 && collpos.z > 0 && collpos.z <= 7.5)
-	{
-		auto c = SceneList[8].get()->GetComponents("Physics");
-		auto r = static_cast<cPhysics *>(c[0]);
-		r->AddImpulse(vec3(0,1,0));
-		//other->AddImpulse(-force);
-	}
+	//if (collpos.x > 0 && collpos.x <= 7.5 && collpos.z > 0 && collpos.z <= 7.5)
+	//{
+	//	auto t = SceneList[8].get()->GetComponents("Physics");
+	//	auto h = static_cast<cPhysics *>(t[0]);
+	//	h->AddImpulse(-force);
+	//}
 
   // Update everything in the scenelist
   for (auto &e : SceneList) {
@@ -399,10 +396,10 @@ bool load_content() {
   }
  
   // For loop which generates the balls to be dropped - it creates 10
-  //for (int i = 1; i < 20; i+=2)
+  for (int i = 1; i < 20; i+=2)
   {
 	  // Create a ball as a unique entity
-	  unique_ptr<Entity> ball = CreateBalltodrop(1, 30, 1);
+	  unique_ptr<Entity> ball = CreateBalltodrop(i, 30, 10);
 	  // Add the ball into the ball to drop list
 	  Balltodrop.push_back(move(ball));
   }

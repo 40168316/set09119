@@ -137,6 +137,7 @@ void cShapeRenderer::Render() {
   case SPHERE:
     phys::DrawSphere(Ent_->GetPosition(), 0.3f, col_);
     break;
+	// Plane object which allows me to draw a plane taking in the position, normal, scale and colour
   case PLANE:
 	  phys::DrawPlane(Ent_->GetPosition(), vec3(0,0,0), Ent_->GetScale(), col_);
 	  break;

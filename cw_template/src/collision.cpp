@@ -11,6 +11,7 @@ namespace collision {
 		const dvec3 d = p2 - p1;
 		const double distance = glm::length(d);
 		const double sumRadius = c1.radius + c2.radius;
+		// Sphere to sphere collision using the radii of thee particles
 		if (distance < sumRadius) {
 			depth = sumRadius - distance;
 			norm = -glm::normalize(d);
@@ -28,12 +29,11 @@ namespace collision {
 
 		// Calculate the distance: dot product of the new vector with the plane's normal
 		double distance = dot(vecTemp, p.normal);
-
+		// Sphere collision to plane using the radius of the sphere and the normal to the plane
 		if (distance <= s.radius) {
 			norm = p.normal;
 			pos = sp - norm * distance;
 			depth = s.radius - distance;
-			//cout << "collison" << endl;
 			return true;
 		}
 

@@ -2,7 +2,7 @@
 #include "game.h"
 extern bool collisionbool;
 extern glm::vec3 collpos;
-extern glm::vec3 force;
+extern glm::dvec3 force;
 class cPhysics : public Component {
 public:
 	cPhysics();
@@ -64,26 +64,21 @@ public:
 private:
 };
 
-
+// Spring particle class
 class ParticleSpring
 {
-	/** The particle at the other end of the spring. */
+	/** The particle at the other end of the spring. - ie the next particle */
 	cPhysics *other;
-
-	/** Holds the sprint constant. */
+	// Spring constant which is the stiffness of the spring 
 	double springConstant;
+	// Dmaping factor, which is set to 40, which is the speed the tramploine returns to its orignial position
 	double damp = 40.0;
-	/** Holds the rest length of the spring. */
+	// Rest length is the length of the spring when no force is applied 
 	double restLength;
-
 public:
-
 	/** Creates a new spring with the given parameters. */
-	ParticleSpring(cPhysics *other,
-		double springConstant, double restLength);
-
+	ParticleSpring(cPhysics *other, double springConstant, double restLength);
 	ParticleSpring();
-
 	/** Applies the spring force to the given particle. */
 	virtual void updateForce(cPhysics *particle, double duration);
 };

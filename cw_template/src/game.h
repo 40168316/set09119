@@ -79,6 +79,7 @@ public:
 
 class cShapeRenderer : public Component {
 public:
+	// Rmeove of box and the delcaration of sphere and plane
   enum SHAPES { SPHERE, PLANE };
   const SHAPES shape;
   void SetColour(const phys::RGBAInt32 c);

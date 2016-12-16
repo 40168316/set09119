@@ -5,10 +5,11 @@ using namespace std;
 using namespace glm;
 static vector<cPhysics *> physicsScene;
 static vector<cCollider *> colliders;
+// Creation of some global variables which are passed into the main
 bool collisionbool = false;
 vec3 collpos = vec3(0, 0, 0);
-static dvec3 gravity = dvec3(0, -10.0, 0);
-
+static glm::dvec3 gravity = glm::dvec3(0, -10.0, 0);
+//glm::dvec3 force = dvec3(0.0,0.0,0.0);
 void Resolve(const collisionInfo &ci) {
 
   const double coef = 0.5;
@@ -67,10 +68,10 @@ void UpdatePhysics(const double t, const double dt) {
 			{
 				if (collision::IsColliding(*colliders[i], *colliders[j], pos, norm, depth)) 
 				{
-					//cout << "coll" << endl;
+					// Pass the collision position to the main via a global variable
 					collpos = pos;
-					//cout << collpos << endl;
 					collisions.push_back({ colliders[i], colliders[j], pos, norm, depth });
+					// Set collision detection equal to true
 					collisionbool = true;
 				}
 			}
@@ -141,35 +142,45 @@ cPlaneCollider::cPlaneCollider() : normal(dvec3(0, 1.0, 0)), cCollider("PlaneCol
 
 cPlaneCollider::~cPlaneCollider() {}
 
+// Particle Spring which takes in the springconstant, restlength and other particle which is the next particle to link to
 ParticleSpring::ParticleSpring(cPhysics * other, double springConstant, double restLength) : other(other), springConstant(springConstant), restLength(restLength)
 {
 }
 
+// Empty particle spring which is called to create an empty spring
 ParticleSpring::ParticleSpring()
 {
 }
 
+// Particle Sring method which calculates the force and then applies it to the other the particle and the next particle
 void ParticleSpring::updateForce(cPhysics *particle, double duration)
 {
-	// Calculate the vector of the spring
+	// Calculate the vector force 
 	dvec3 force;
+	// Get the position of the particle and make it equal to the force
 	force = particle->position;
+	// Get the position of the next particle and take away from the force
 	force -= other->position;
-
 	// Calculate the magnitude of the force
 	float magnitude = length(force);
-
-	magnitude = (magnitude - restLength);
+	// Take the rest length away from the magnitude
+	magnitude -= restLength;
+	// Muitlply the spring constant by the magnitude
 	magnitude *= springConstant;
-
-	// Calculate the final force and apply it
+	// Normalise the force
 	force = normalize(force);
+	// Multiply te force by the negative magnitude
 	force *= -magnitude;
 
+	// Create a damping force which comes from the particles velcoity
 	vec3 dampForce = particle->velocity - other->velocity;
+	// Multiply the damping force my the damp value pass in from main
 	dampForce *= damp;
+	// Take the damping force away from the force
 	force -= dampForce;
 
+	// Apply the forces as an impulse to the particle
 	particle->AddImpulse(force);
+	// Apply the opposite force as an impulse to the particle
 	other->AddImpulse(-force);
 }
