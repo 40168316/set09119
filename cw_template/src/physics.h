@@ -2,6 +2,7 @@
 #include "game.h"
 extern bool collisionbool;
 extern glm::vec3 collpos;
+extern glm::vec3 force;
 class cPhysics : public Component {
 public:
 	cPhysics();

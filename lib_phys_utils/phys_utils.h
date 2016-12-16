@@ -41,7 +41,7 @@ void SetCameraTarget(const glm::vec3 &p0);
 void DrawLine(const glm::vec3 &p0, const glm::vec3 &p1, const bool depth = true, const RGBAInt32 col = RED);
 void DrawLineCross(const glm::vec3 &p0, float radius = 1.0f, const bool depth = true, const RGBAInt32 col = RED);
 
-void DrawPlane(const glm::vec3 &p0, const glm::vec3 &norm, const glm::vec3 &scale = glm::vec3(1.0f, 1.0f, 1.0f),
+void DrawPlane(const glm::vec3 &p0, const glm::vec3 &norm, const glm::vec3 &scale,
                const RGBAInt32 col = RED);
 
 void DrawArrow(const glm::vec3 &p0, const glm::vec3 &p1, const double thickness, const RGBAInt32 col = RED);

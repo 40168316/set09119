@@ -69,7 +69,7 @@ void UpdatePhysics(const double t, const double dt) {
 				{
 					//cout << "coll" << endl;
 					collpos = pos;
-					cout << collpos << endl;
+					//cout << collpos << endl;
 					collisions.push_back({ colliders[i], colliders[j], pos, norm, depth });
 					collisionbool = true;
 				}

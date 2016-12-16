@@ -137,11 +137,8 @@ void cShapeRenderer::Render() {
   case SPHERE:
     phys::DrawSphere(Ent_->GetPosition(), 0.3f, col_);
     break;
-  case BOX:
-    phys::DrawCube(Ent_->GetPosition(), Ent_->GetScale(), col_);
-    break;
   case PLANE:
-	  phys::DrawPlane(Ent_->GetPosition(), vec3(0.0,0.0,0.0), Ent_->GetScale(), col_);
+	  phys::DrawPlane(Ent_->GetPosition(), vec3(0,0,0), Ent_->GetScale(), col_);
 	  break;
   default:
     phys::DrawSphere(Ent_->GetPosition(), 0.3f, col_);

@@ -59,49 +59,50 @@ vector <glm::vec3> grid;
 
 	return true;
 }
-
+ 
 // Method which creates particles which are used to create the trampoline shape. These particles take in positions and coordinates
 unique_ptr<Entity> CreateParticle(int xposition, int yposition, int zposition, int xcoord, int ycoord, int zcoord) {
-  // Creation of ent which is a new entity which stores all the information like posiition and rotation
-  unique_ptr<Entity> ent(new Entity());
-  // Set the position of the entity
-  ent->SetPosition(vec3(xposition, yposition, zposition));
-  // Create a new physics component which deals with all the physics like forces and mass
-  unique_ptr<Component> physComponent(new cPhysics());
-  // Create a sphere object as a particle
-  unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::PLANE));
-  ent->SetScale(vec3(5.0, 0.0, 5.0));
-  // Set the colour of the particle to a deafult black
-  phys::RGBAInt32 colour = BLACK;
-  // Set the colour of the particles depending on there posiiton
-  // If the partciles are on the outside of the trampoline set their colour to blue
-  if (zcoord <1 || zcoord >5 || xcoord < 1 || xcoord > 5) {
-	  //ent->SetColour(colour = BLUE);
-	  ent->colour = BLUE;
-  }
-  // If the partciles are inbetween certain values then set the colour to yellow
-  else if (zcoord < 2 || zcoord >4 || xcoord < 2 || xcoord > 4)
-  {
-	  renderComponent->SetColour(colour = YELLOW);
-  }
-  // If the partciles are inbetween certain values then set the colour to yellow
-  else if (zcoord < 3 || zcoord >3 || xcoord < 3 || xcoord > 3)
-  {
-	  renderComponent->SetColour(colour = GREEN);
-  }
-  // Else then set the remaining particles to white - in this case the only remaining particle should be white
-  else 
-  {
-	  renderComponent->SetColour(colour = WHITE);
-  }
-  // Add the physics component to the entity
-  ent->AddComponent(physComponent);
-  // Add the sphere collider to the entity - C	ollider and particle are set to a scale of 0.3
-  ent->AddComponent(unique_ptr<Component>(new cPlaneCollider()));
-  // Add the render component to the entity
-  ent->AddComponent(unique_ptr<Component>(move(renderComponent)));
-  // Return the complete entity
-  return ent;
+	// Creation of ent which is a new entity which stores all the information like posiition and rotation
+	unique_ptr<Entity> ent(new Entity());
+	// Set the position of the entity
+	ent->SetPosition(vec3(xposition, yposition, zposition));
+	// Create a new physics component which deals with all the physics like forces and mass
+	unique_ptr<Component> physComponent(new cPhysics());
+	// Create a sphere object as a particle
+	ent->SetScale(vec3(5.0, 0.0, 5.0));
+	unique_ptr<cShapeRenderer> renderComponent(new cShapeRenderer(cShapeRenderer::SPHERE));
+	
+	// Set the colour of the particle to a deafult black
+	phys::RGBAInt32 colour = BLACK;
+	// Set the colour of the particles depending on there posiiton
+	// If the partciles are on the outside of the trampoline set their colour to blue
+	if (zcoord <1 || zcoord >5 || xcoord < 1 || xcoord > 5) 
+	{
+		renderComponent->SetColour(colour = BLUE);
+	}
+	// If the partciles are inbetween certain values then set the colour to yellow
+	else if (zcoord < 2 || zcoord >4 || xcoord < 2 || xcoord > 4)
+	{
+		renderComponent->SetColour(colour = YELLOW);
+	}
+	// If the partciles are inbetween certain values then set the colour to yellow
+	else if (zcoord < 3 || zcoord >3 || xcoord < 3 || xcoord > 3)
+	{
+		renderComponent->SetColour(colour = GREEN);
+	}
+	// Else then set the remaining particles to white - in this case the only remaining particle should be white
+	else
+	{
+		renderComponent->SetColour(colour = WHITE);
+	}
+	// Add the physics component to the entity
+	ent->AddComponent(physComponent);
+	// Add the sphere collider to the entity - C	ollider and particle are set to a scale of 0.3
+	ent->AddComponent(unique_ptr<Component>(new cSphereCollider()));
+	// Add the render component to the entity
+	ent->AddComponent(unique_ptr<Component>(move(renderComponent)));
+	// Return the complete entity
+	return ent;
 }
 
 // Method which creates a ball to be dropped on the trampoline
@@ -354,17 +355,14 @@ bool update(float delta_time)
 	  }
   }
 
-  for (int b = 0; b < 30; b+=5)
-  {
-	  for (int c = 0; c < 30; c+=5)
-	  {
-		  if (collpos.x > b && collpos.x <= b+5 && collpos.z > c && collpos.z <= c+5)
-		  {
-			  cout << "Tile b " << b/5 << " c " << c/5 << endl;
-		  }
-	  }
-  }
-  
+	if (collpos.x > 0 && collpos.x <= 7.5 && collpos.z > 0 && collpos.z <= 7.5)
+	{
+		auto c = SceneList[8].get()->GetComponents("Physics");
+		auto r = static_cast<cPhysics *>(c[0]);
+		r->AddImpulse(vec3(0,1,0));
+		//other->AddImpulse(-force);
+	}
+
   // Update everything in the scenelist
   for (auto &e : SceneList) {
     e->Update(delta_time);
@@ -401,10 +399,10 @@ bool load_content() {
   }
  
   // For loop which generates the balls to be dropped - it creates 10
-  for (int i = 1; i < 20; i+=2)
+  //for (int i = 1; i < 20; i+=2)
   {
 	  // Create a ball as a unique entity
-	  unique_ptr<Entity> ball = CreateBalltodrop(i, 30, 11);
+	  unique_ptr<Entity> ball = CreateBalltodrop(1, 30, 1);
 	  // Add the ball into the ball to drop list
 	  Balltodrop.push_back(move(ball));
   }
@@ -451,7 +449,7 @@ bool render() {
 void main() {
   // Create application
   app application;
-  //application.set_initialise(initialise);
+  application.set_initialise(initialise);
   // Set load content, update and render methods
   application.set_load_content(load_content);
   application.set_update(update);
